@@ -1,0 +1,42 @@
+library(survminer)
+library(ggplot2)
+library(dplyr)
+
+# Убедись, что данные чистые
+data_clean <- data %>%
+  mutate(
+    time = as.numeric(`мОВ`),
+    status = as.numeric(`Умер (1 да, 0 — нет)`),
+    group = factor(`Траст был? (0-нет,1-да)`,
+                   levels = c(0, 1),
+                   labels = c("Без трастузумаба", "С трастузумабом"))
+  ) %>%
+  filter(!is.na(time) & !is.na(status) & !is.na(group))
+
+# Строим модель
+fit <- survfit(Surv(time, status) ~ group, data = data_clean)
+
+# Строим график
+plot <- ggsurvplot(
+  fit,
+  data = data_clean,
+  conf.int = TRUE,
+  pval = TRUE,
+  surv.median.line = "hv",
+  surv.scale = "percent",
+  risk.table = TRUE,
+  risk.table.height = 0.3,
+  ggtheme = theme_classic(base_size = 14),
+  risk.table.theme = theme_classic(base_size = 14),
+  xlab = "Время (мес.)",
+  ylab = "Общая выживаемость (%)",
+  legend.title = "Группа",
+  legend.labs = c("Без трастузумаба", "С трастузумабом"),
+  palette = c("blue", "red"),
+  break.time.by = 2,
+  xlim = c(0, 36)
+)
+
+# Сохраняем график в PNG
+ggsave("KM_OS_final.png", plot = print(plot), dpi = 300, width = 12, height = 7)
+Add OS analysis script
