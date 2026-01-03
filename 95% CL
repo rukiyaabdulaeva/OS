@@ -1,0 +1,5 @@
+# Расчёт медианы и доверительных интервалов
+library(survival)
+
+fit <- survfit(Surv(time, status) ~ group, data = data_clean)
+summary(fit)$table
